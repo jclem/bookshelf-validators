@@ -46,7 +46,6 @@ Validator.prototype.required = function(attribute, testValue, message) {
   }
 
   if (!value) {
-    this.record.get('errors').push(message);
     return Promise.reject(message);
   } else {
     return Promise.resolve();
@@ -70,7 +69,6 @@ Validator.prototype.match = function(attribute, testValue, message) {
   }
 
   if (value !== matchValue) {
-    this.record.get('errors').push(message);
     return Promise.reject(message);
   } else {
     return Promise.resolve();
@@ -101,7 +99,6 @@ Validator.prototype.minLength = function(attribute, testValue, message) {
   }
 
   if (value.length < testValue) {
-    this.record.get('errors').push(message);
     return Promise.reject(message);
   } else {
     return Promise.resolve();
@@ -131,7 +128,6 @@ Validator.prototype.maxLength = function(attribute, testValue, message) {
   }
 
   if (value.length > testValue) {
-    this.record.get('errors').push(message);
     return Promise.reject(message);
   } else {
     return Promise.resolve();
@@ -160,7 +156,6 @@ Validator.prototype.pattern = function(attribute, testValue, message) {
   }
 
   if (!value.match(testValue)) {
-    this.record.get('errors').push(message);
     return Promise.reject(message);
   } else {
     return Promise.resolve();
