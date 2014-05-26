@@ -3,8 +3,30 @@
 require('should');
 
 var Validator = require('..');
-var Model     = require('./model');
+var db        = require('./db');
+var Model     = db.Model;
 var Promise   = require('bluebird');
+
+before(function(done) {
+  db.knex.schema.hasTable('models').then(function(exists) {
+    if (exists) {
+      return db.knex.schema.dropTable('models');
+    }
+  }).then(function() {
+    return db.knex.schema.createTable('models', function(table) {
+      table.increments('id').primary();
+      table.string('name');
+    });
+  }).then(function() {
+    done();
+  });
+});
+
+beforeEach(function(done) {
+  db.knex('models').truncate().then(function() {
+    done();
+  });
+});
 
 describe('Validator', function() {
   var model, validator;
@@ -37,19 +59,19 @@ describe('Validator', function() {
 
   describe('#match', function() {
     it('fails when values do not match', function() {
-      model.set('foo', 'x');
-      model.set('foo_confirmation', 'xx');
+      model.set('name', 'x');
+      model.set('name_confirmation', 'xx');
 
-      validator.match('foo', 'foo_confirmation').catch(function(err) {
-        err.should.eql('foo must match foo_confirmation');
+      validator.match('name', 'name_confirmation').catch(function(err) {
+        err.should.eql('name must match name_confirmation');
       });
     });
 
     it('passes when values match', function() {
-      model.set('foo', 'x');
-      model.set('foo_confirmation', 'x');
+      model.set('name', 'x');
+      model.set('name_confirmation', 'x');
 
-      validator.match('foo', 'foo_confirmation');
+      validator.match('name', 'name_confirmation');
     });
   });
 
@@ -115,6 +137,45 @@ describe('Validator', function() {
     it('ignores an empty value', function() {
       model.set('name', null);
       validator.pattern('name', /^[a-z]+$/);
+    });
+  });
+
+  describe('#unique', function() {
+    it('fails when a value is not unique', function(done) {
+      var model2 = Model.forge({ name: 'name' });
+      model.set('name', 'name');
+
+      model2.save().then(function() {
+        validator.unique('name').catch(function(err) {
+          err.should.eql('name must be unique');
+          done();
+        });
+      });
+    });
+
+    it('passes when a value is unique', function(done) {
+      var model2 = Model.forge({ name: 'name' });
+      model.set('name', 'name2');
+
+      model2.save().then(function() {
+        validator.unique('name').then(done);
+      });
+    });
+
+    it('passes when this record is the only record', function(done) {
+      model.set('name', 'name');
+
+      model.save().then(function() {
+        validator.unique('name').then(done);
+      });
+    });
+
+    it('passes when teh value is falsy', function(done) {
+      var model2 = Model.forge({ name: 'name' });
+
+      model2.save().then(function() {
+        validator.unique('name').then(done);
+      });
     });
   });
 });

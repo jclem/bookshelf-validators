@@ -163,6 +163,44 @@ Validator.prototype.pattern = function(attribute, testValue, message) {
 };
 
 /**
+ * Validate that a field is unique.
+ *
+ * @method unique
+ * @param {String} attribute the attribute to be tested for uniqueness
+ * @param {Boolean} testValue an unused argument for consistent function
+ *   signatures
+ * @param {String} [message] an error message to use other than the default
+ * @return {Promise} a rejected or resolved promise, based on whether the given
+ *   attribute is unique
+ */
+Validator.prototype.unique = function(attribute, testValue, message) {
+  var value = this.record.get(attribute);
+  var klass = this.record.constructor;
+  var query = {};
+  var self  = this;
+
+  query[attribute] = value;
+
+  if (!value) {
+    return Promise.resolve();
+  }
+
+  if (!message) {
+    message = fmt('#{attribute} must be unique', attribute);
+  }
+
+  return klass.collection().query().where(query).select().then(function(found) {
+    found = found[0];
+
+    if (found && found.id !== self.record.get('id')) {
+      return Promise.reject(message);
+    } else {
+      return Promise.resolve();
+    }
+  });
+};
+
+/**
  * Format a string.
  *
  * @method fmt

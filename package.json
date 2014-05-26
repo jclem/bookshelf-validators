@@ -4,7 +4,7 @@
   "description": "a validator for Bookshelf.js models",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/test.js -t 10"
+    "test": "mocha test/test.js -t 100"
   },
   "repository": {
     "type": "git",
@@ -27,14 +27,15 @@
   "devDependencies": {
     "bookshelf": "^0.6.10",
     "mocha": "^1.19.0",
-    "pg.js": "^3.2.0",
-    "should": "^3.3.2"
+    "should": "^3.3.2",
+    "sqlite3": "^2.2.3"
   },
   "jshintConfig": {
     "globalstrict": true,
-    "globals"     : {
+    "globals": {
       "beforeEach": false,
       "describe"  : false,
+      "exports"   : false,
       "it"        : false,
       "module"    : false,
       "require"   : false
