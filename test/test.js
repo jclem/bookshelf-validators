@@ -83,4 +83,38 @@ describe('Validator', function() {
       });
     });
   });
+
+  describe('#maxLength', function() {
+    it('fails when a max length is exceeded', function() {
+      model.set('name', 'xxxx');
+
+      validator.maxLength('name', 3).then(null, function() {
+        model.get('errors').should.eql(['name must be at most 3 characters long']);
+      });
+    });
+
+    it('passes when a max length is not met', function() {
+      model.set('name', 'xx');
+
+      validator.maxLength('name', 3).then(function() {
+        model.get('errors').should.eql([]);
+      });
+    });
+
+    it('passes when a max length met', function() {
+      model.set('name', 'xxx');
+
+      validator.maxLength('name', 3).then(function() {
+        model.get('errors').should.eql([]);
+      });
+    });
+
+    it('passes when a value is falsy', function() {
+      model.set('name', '');
+
+      validator.maxLength('name', 3).then(function() {
+        model.get('errors').should.eql([]);
+      });
+    });
+  });
 });

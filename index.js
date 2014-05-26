@@ -109,6 +109,36 @@ Validator.prototype.minLength = function(attribute, testValue, message) {
 };
 
 /**
+ * Validate that a field is not over a max length. This method ignores
+ * non-truthy values.
+ *
+ * @method max
+ * @param {String} attribute the attribute to be tested for maximum length
+ * @param {Number} testValue the maximum length to ensure values are
+ * @param {String} [message] an error message to use other than the default
+ * @return {Promise} a rejected or resolved promise, based on whether the given
+ *   attribute is less than or equal to the maximum length
+ */
+Validator.prototype.maxLength = function(attribute, testValue, message) {
+  var value = this.record.get(attribute);
+
+  if (!value) {
+    return Promise.resolve();
+  }
+
+  if (!message) {
+    message = fmt('#{attribute} must be at most #{testValue} characters long', attribute, testValue);
+  }
+
+  if (value.length > testValue) {
+    this.record.get('errors').push(message);
+    return Promise.reject(message);
+  } else {
+    return Promise.resolve();
+  }
+};
+
+/**
  * Format a string.
  *
  * @method fmt
