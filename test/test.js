@@ -36,6 +36,12 @@ describe('Validator', function() {
     validator = new Validator(model);
   });
 
+  it('accepts custom validation messages', function() {
+    validator.required('name', null, 'name must be present').catch(function(err) {
+      err.should.eql('name must be present');
+    });
+  });
+
   describe('#required', function() {
     it('fails when a value is not present', function() {
       validator.required('name').catch(function(err) {
