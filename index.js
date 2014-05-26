@@ -54,6 +54,30 @@ Validator.prototype.required = function(attribute, testValue, message) {
 };
 
 /**
+ * Validate that a field matches another field.
+ *
+ * @method match
+ * @param {String} attribute the attribute to be tested for matching
+ * @param {Number} testValue the attribute to be compared to
+ * @return {Promise} a promise resolved when the comparison is equal
+ */
+Validator.prototype.match = function(attribute, testValue, message) {
+  var value      = this.record.get(attribute);
+  var matchValue = this.record.get(testValue);
+
+  if (!message) {
+    message = fmt('#{attribute} must match #{testValue}', attribute, testValue);
+  }
+
+  if (value !== matchValue) {
+    this.record.get('errors').push(message);
+    return Promise.reject(message);
+  } else {
+    return Promise.resolve();
+  }
+};
+
+/**
  * Validate that a field has a minumum length. This method ignores
  * non-truthy values, so to prevent empty strings, a field must be `required`,
  * not set to `minLength` of `1`.
