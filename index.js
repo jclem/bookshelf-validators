@@ -139,6 +139,35 @@ Validator.prototype.maxLength = function(attribute, testValue, message) {
 };
 
 /**
+ * Validate that a field matches a specified pattern.
+ *
+ * @method pattern
+ * @param {String} attribute the attribute to be tested for a pattern match
+ * @param {RegExp} testValue the pattern to test the attribute against
+ * @param {String} [message] an error message to use other than the default
+ * @return {Promise} a rejected or resolved promise, based on whether the given
+ *   attribute matches the given pattern
+ */
+Validator.prototype.pattern = function(attribute, testValue, message) {
+  var value = this.record.get(attribute);
+
+  if (!value) {
+    return Promise.resolve();
+  }
+
+  if (!message) {
+    message = fmt('\'#{value}\' is not a valid #{attribute}', value, attribute);
+  }
+
+  if (!value.match(testValue)) {
+    this.record.get('errors').push(message);
+    return Promise.reject(message);
+  } else {
+    return Promise.resolve();
+  }
+};
+
+/**
  * Format a string.
  *
  * @method fmt

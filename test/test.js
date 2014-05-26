@@ -117,4 +117,30 @@ describe('Validator', function() {
       });
     });
   });
+
+  describe('#pattern', function() {
+    it('tests that a pattern matches a value', function() {
+      model.set('name', '!');
+
+      validator.pattern('name', /^[a-z]+$/).then(null, function() {
+        model.get('errors').should.eql(['\'!\' is not a valid name']);
+      });
+    });
+
+    it('ignores a valid value', function() {
+      model.set('name', 'name');
+
+      validator.pattern('name', /^[a-z]+$/).then(function() {
+        model.get('errors').should.eql([]);
+      });
+    });
+
+    it('ignores an empty value', function() {
+      model.set('name', null);
+
+      validator.pattern('name', /^[a-z]+$/).then(function() {
+        model.get('errors').should.eql([]);
+      });
+    });
+  });
 });
