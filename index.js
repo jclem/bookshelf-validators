@@ -189,9 +189,7 @@ Validator.prototype.unique = function(attribute, testValue, message) {
     message = fmt('#{attribute} must be unique', attribute);
   }
 
-  return klass.collection().query().where(query).select().then(function(found) {
-    found = found[0];
-
+  return klass.collection().query({ where: query }).fetchOne().then(function(found) {
     if (found && found.id !== self.record.get('id')) {
       return Promise.reject(message);
     } else {
