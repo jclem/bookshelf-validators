@@ -82,7 +82,7 @@ Validator.prototype.validate = function() {
 
       if (messages.length) {
         err = new Error();
-        err.messages = messages
+        err.messages = messages;
         reject(err);
       } else {
         resolve();
