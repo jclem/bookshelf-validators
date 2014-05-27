@@ -32,8 +32,8 @@ function Validator(record, validations) {
 
 /**
  * Iterate over the validator's validations and return a promise that is
- * resolved if there are no failed validations, or rejected with an array of
- * errors if there are failed validations.
+ * resolved if there are no failed validations, or rejected with an error whose
+ * `messages` property is an array of the failed validation messages.
  *
  * @method validate
  * @return {Promise} a promise, rejected with errors if there are errors
@@ -72,14 +72,18 @@ Validator.prototype.validate = function() {
     }.bind(this), []);
 
     return Promise.settle(validations).then(function(results) {
-      var errors = results.filter(function(result) {
+      var messages = results.filter(function(result) {
         return result.isRejected();
       }).map(function(result) {
-        return result.error();
+        return result.error().message;
       });
 
-      if (errors.length) {
-        reject(errors);
+      var err;
+
+      if (messages.length) {
+        err = new Error();
+        err.messages = messages
+        reject(err);
       } else {
         resolve();
       }
@@ -107,7 +111,7 @@ Validator.prototype.required = function(attribute, testValue, message) {
   }
 
   if (!value) {
-    return Promise.reject(message);
+    return Promise.reject(new Error(message));
   } else {
     return Promise.resolve();
   }
@@ -130,7 +134,7 @@ Validator.prototype.match = function(attribute, testValue, message) {
   }
 
   if (value !== matchValue) {
-    return Promise.reject(message);
+    return Promise.reject(new Error(message));
   } else {
     return Promise.resolve();
   }
@@ -160,7 +164,7 @@ Validator.prototype.minLength = function(attribute, testValue, message) {
   }
 
   if (value.length < testValue) {
-    return Promise.reject(message);
+    return Promise.reject(new Error(message));
   } else {
     return Promise.resolve();
   }
@@ -189,7 +193,7 @@ Validator.prototype.maxLength = function(attribute, testValue, message) {
   }
 
   if (value.length > testValue) {
-    return Promise.reject(message);
+    return Promise.reject(new Error(message));
   } else {
     return Promise.resolve();
   }
@@ -217,7 +221,7 @@ Validator.prototype.pattern = function(attribute, testValue, message) {
   }
 
   if (!value.match(testValue)) {
-    return Promise.reject(message);
+    return Promise.reject(new Error(message));
   } else {
     return Promise.resolve();
   }
@@ -252,7 +256,7 @@ Validator.prototype.unique = function(attribute, testValue, message) {
 
   return klass.collection().query({ where: query }).fetchOne().then(function(found) {
     if (found && found.id !== self.record.get('id')) {
-      return Promise.reject(message);
+      return Promise.reject(new Error(message));
     } else {
       return Promise.resolve();
     }

@@ -37,12 +37,15 @@ describe('Validator', function() {
   });
 
   it('accepts custom validation messages', function() {
-    validator.required('name', null, 'name must be present').catch(function(err) {
-      err.should.eql('name must be present');
+    validator.required('name', null, 'name must be present').error(function(err) {
+      err.message.should.eql('name must be present');
     });
   });
 
   describe('#validate', function() {
+    it('throws a specific error that can be caught', function() {
+    });
+
     describe('when there are no failed validations', function() {
       it('resolves the promise', function() {
         model.set('name', 'name-Clem');
@@ -56,8 +59,8 @@ describe('Validator', function() {
       it('rejects with the validation messages', function(done) {
         model.set('name', 'Jonathan Clem');
 
-        validator.validate().catch(function(errors) {
-          errors.should.eql([
+        validator.validate().error(function(err) {
+          err.messages.should.eql([
             'location is required',
             '\'Jonathan Clem\' is not a valid name',
             'name must be less than 11 characters long'
@@ -71,8 +74,8 @@ describe('Validator', function() {
 
   describe('#required', function() {
     it('fails when a value is not present', function(done) {
-      validator.required('name').catch(function(err) {
-        err.should.eql('name is required');
+      validator.required('name').error(function(err) {
+        err.message.should.eql('name is required');
         done();
       });
     });
@@ -80,8 +83,8 @@ describe('Validator', function() {
     it('fails when a value is falsy', function(done) {
       model.set('name', NaN);
 
-      validator.required('name').catch(function(err) {
-        err.should.eql('name is required');
+      validator.required('name').error(function(err) {
+        err.message.should.eql('name is required');
         done();
       });
     });
@@ -97,8 +100,8 @@ describe('Validator', function() {
       model.set('name', 'x');
       model.set('name_confirmation', 'xx');
 
-      validator.match('name', 'name_confirmation').catch(function(err) {
-        err.should.eql('name must match name_confirmation');
+      validator.match('name', 'name_confirmation').error(function(err) {
+        err.message.should.eql('name must match name_confirmation');
         done();
       });
     });
@@ -115,8 +118,8 @@ describe('Validator', function() {
     it('fails when a minimum length is not met', function(done) {
       model.set('name', 'xx');
 
-      validator.minLength('name', 3).catch(function(err) {
-        err.should.eql('name must be at least 3 characters long');
+      validator.minLength('name', 3).error(function(err) {
+        err.message.should.eql('name must be at least 3 characters long');
         done();
       });
     });
@@ -136,8 +139,8 @@ describe('Validator', function() {
     it('fails when a max length is exceeded', function(done) {
       model.set('name', 'xxxx');
 
-      validator.maxLength('name', 3).catch(function(err) {
-        err.should.eql('name must be at most 3 characters long');
+      validator.maxLength('name', 3).error(function(err) {
+        err.message.should.eql('name must be at most 3 characters long');
         done();
       });
     });
@@ -162,8 +165,8 @@ describe('Validator', function() {
     it('tests that a pattern matches a value', function(done) {
       model.set('name', '!');
 
-      validator.pattern('name', /^[a-z]+$/).catch(function(err) {
-        err.should.eql('\'!\' is not a valid name');
+      validator.pattern('name', /^[a-z]+$/).error(function(err) {
+        err.message.should.eql('\'!\' is not a valid name');
         done();
       });
     });
@@ -185,8 +188,8 @@ describe('Validator', function() {
       model.set('name', 'name');
 
       model2.save().then(function() {
-        validator.unique('name').catch(function(err) {
-          err.should.eql('name must be unique');
+        validator.unique('name').error(function(err) {
+          err.message.should.eql('name must be unique');
           done();
         });
       });
