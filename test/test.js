@@ -33,12 +33,39 @@ describe('Validator', function() {
 
   beforeEach(function() {
     model     = Model.forge();
-    validator = new Validator(model);
+    validator = new Validator(model, model.validations);
   });
 
   it('accepts custom validation messages', function() {
     validator.required('name', null, 'name must be present').catch(function(err) {
       err.should.eql('name must be present');
+    });
+  });
+
+  describe('#validate', function() {
+    describe('when there are no failed validations', function() {
+      it('resolves the promise', function() {
+        model.set('name', 'name-Clem');
+        model.set('location', 'New York');
+
+        validator.validate();
+      });
+    });
+
+    describe('when there are failed validations', function() {
+      it('rejects with the validation messages', function(done) {
+        model.set('name', 'Jonathan Clem');
+
+        validator.validate().catch(function(errors) {
+          errors.should.eql([
+            'location is required',
+            '\'Jonathan Clem\' is not a valid name',
+            'name must be less than 11 characters long'
+          ]);
+
+          done();
+        });
+      });
     });
   });
 

@@ -22,7 +22,8 @@
   },
   "homepage": "https://github.com/jclem/bookshelf-validator",
   "dependencies": {
-    "bluebird": "^1.2.4"
+    "bluebird": "^1.2.4",
+    "lodash": "^2.4.1"
   },
   "devDependencies": {
     "bookshelf": "^0.6.10",
@@ -34,11 +35,11 @@
     "globalstrict": true,
     "globals": {
       "beforeEach": false,
-      "describe"  : false,
-      "exports"   : false,
-      "it"        : false,
-      "module"    : false,
-      "require"   : false
+      "describe": false,
+      "exports": false,
+      "it": false,
+      "module": false,
+      "require": false
     }
   }
 }

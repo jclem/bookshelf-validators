@@ -9,5 +9,18 @@ var connection = require('bookshelf').initialize({
 
 exports.knex  = connection.knex;
 exports.Model = connection.Model.extend({
-  tableName: 'models'
+  tableName: 'models',
+  validations: {
+    location: {
+      required: true
+    },
+
+    name: {
+      pattern  : /^name-/,
+      maxLength: {
+        testValue: 10,
+        message  : 'name must be less than 11 characters long'
+      }
+    }
+  }
 });

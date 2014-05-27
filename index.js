@@ -1,6 +1,7 @@
 'use strict';
 
 var Promise = require('bluebird');
+var _       = require('lodash');
 
 /**
  * Class responsible for validating the attributes of a model. Calling methods
@@ -12,6 +13,8 @@ var Promise = require('bluebird');
  * @class Validator
  * @constructor
  * @param {Model} record the Bookshelf.js model to be validated
+ * @param {Object} validations the validations to validate the model with when
+ *   calling `#validate`
  * @example
  *     var group     = Group.forge({ name: 'group-name' });
  *     var validator = new Validator(group);
@@ -22,9 +25,67 @@ var Promise = require('bluebird');
  *       // the validation failed
  *     });
  */
-function Validator(record) {
-  this.record = record;
+function Validator(record, validations) {
+  this.record      = record;
+  this.validations = validations;
 }
+
+/**
+ * Iterate over the validator's validations and return a promise that is
+ * resolved if there are no failed validations, or rejected with an array of
+ * errors if there are failed validations.
+ *
+ * @method validate
+ * @return {Promise} a promise, rejected with errors if there are errors
+ * @example
+ *     var person    = Person.forge({ name: 'Jonathan Clem' });
+ *     var validator = new Validator(person, {
+ *       name: {
+ *         required : true,
+ *         maxLength: {
+ *           testValue: 10,
+ *           message  : 'name must be less than 11 characters in length'
+ *         }
+ *       }
+ *     });
+ *
+ *     validator.validate().catch(function(errors) {
+ *        errors === ['name must be less than 11 characters in length'];
+ *     });
+ *
+ */
+Validator.prototype.validate = function() {
+  return new Promise(function(resolve, reject) {
+    var validations = Object.keys(this.validations).reduce(function(validations, attr) {
+      return validations.concat(Object.keys(this.validations[attr]).reduce(function(attrValidations, validationName) {
+        var testValue = this.validations[attr][validationName];
+        var message, promise;
+
+        if (_.isPlainObject(testValue)) {
+          message   = testValue.message;
+          testValue = testValue.testValue;
+        }
+
+        promise = this[validationName](attr, testValue, message);
+        return attrValidations.concat(promise);
+      }.bind(this), []));
+    }.bind(this), []);
+
+    return Promise.settle(validations).then(function(results) {
+      var errors = results.filter(function(result) {
+        return result.isRejected();
+      }).map(function(result) {
+        return result.error();
+      });
+
+      if (errors.length) {
+        reject(errors);
+      } else {
+        resolve();
+      }
+    });
+  }.bind(this));
+};
 
 /**
  * Validate that a required field is present. Simply tests the truthiness of
