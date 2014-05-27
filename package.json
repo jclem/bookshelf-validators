@@ -1,14 +1,14 @@
 {
-  "name": "bookshelf-validator",
+  "name": "bookshelf-validators",
   "version": "0.0.0",
-  "description": "a validator for Bookshelf.js models",
+  "description": "validators for Bookshelf.js models",
   "main": "index.js",
   "scripts": {
     "test": "mocha test/test.js -t 100"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jclem/bookshelf-validator"
+    "url": "https://github.com/jclem/bookshelf-validators"
   },
   "keywords": [
     "bookhselfjs",
@@ -18,9 +18,9 @@
   "author": "Jonathan Clem",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jclem/bookshelf-validator/issues"
+    "url": "https://github.com/jclem/bookshelf-validators/issues"
   },
-  "homepage": "https://github.com/jclem/bookshelf-validator",
+  "homepage": "https://github.com/jclem/bookshelf-validators",
   "dependencies": {
     "bluebird": "^1.2.4",
     "lodash": "^2.4.1"
