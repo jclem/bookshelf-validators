@@ -34,12 +34,13 @@
   "jshintConfig": {
     "globalstrict": true,
     "globals": {
+      "before"    : false,
       "beforeEach": false,
-      "describe": false,
-      "exports": false,
-      "it": false,
-      "module": false,
-      "require": false
+      "describe"  : false,
+      "exports"   : false,
+      "it"        : false,
+      "module"    : false,
+      "require"   : false
     }
   }
 }
