@@ -70,17 +70,19 @@ describe('Validator', function() {
   });
 
   describe('#required', function() {
-    it('fails when a value is not present', function() {
+    it('fails when a value is not present', function(done) {
       validator.required('name').catch(function(err) {
         err.should.eql('name is required');
+        done();
       });
     });
 
-    it('fails when a value is falsy', function() {
+    it('fails when a value is falsy', function(done) {
       model.set('name', NaN);
 
       validator.required('name').catch(function(err) {
         err.should.eql('name is required');
+        done();
       });
     });
 
@@ -91,12 +93,13 @@ describe('Validator', function() {
   });
 
   describe('#match', function() {
-    it('fails when values do not match', function() {
+    it('fails when values do not match', function(done) {
       model.set('name', 'x');
       model.set('name_confirmation', 'xx');
 
       validator.match('name', 'name_confirmation').catch(function(err) {
         err.should.eql('name must match name_confirmation');
+        done();
       });
     });
 
@@ -109,11 +112,12 @@ describe('Validator', function() {
   });
 
   describe('#minLenth', function() {
-    it('fails when a minimum length is not met', function() {
+    it('fails when a minimum length is not met', function(done) {
       model.set('name', 'xx');
 
       validator.minLength('name', 3).catch(function(err) {
         err.should.eql('name must be at least 3 characters long');
+        done();
       });
     });
 
@@ -129,11 +133,12 @@ describe('Validator', function() {
   });
 
   describe('#maxLength', function() {
-    it('fails when a max length is exceeded', function() {
+    it('fails when a max length is exceeded', function(done) {
       model.set('name', 'xxxx');
 
       validator.maxLength('name', 3).catch(function(err) {
         err.should.eql('name must be at most 3 characters long');
+        done();
       });
     });
 
@@ -154,11 +159,12 @@ describe('Validator', function() {
   });
 
   describe('#pattern', function() {
-    it('tests that a pattern matches a value', function() {
+    it('tests that a pattern matches a value', function(done) {
       model.set('name', '!');
 
       validator.pattern('name', /^[a-z]+$/).catch(function(err) {
         err.should.eql('\'!\' is not a valid name');
+        done();
       });
     });
 
@@ -203,7 +209,7 @@ describe('Validator', function() {
       });
     });
 
-    it('passes when teh value is falsy', function(done) {
+    it('passes when the value is falsy', function(done) {
       var model2 = Model.forge({ name: 'name' });
 
       model2.save().then(function() {
