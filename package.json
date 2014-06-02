@@ -33,7 +33,9 @@
   },
   "jshintConfig": {
     "globalstrict": true,
-    "globals": {
+    "undef"       : true,
+    "unused"      : true,
+    "globals"     : {
       "before"    : false,
       "beforeEach": false,
       "describe"  : false,

@@ -278,7 +278,7 @@ function fmt() {
   var string = args[0];
   var values = args.slice(1);
   var i      = 0;
-  var match, replace;
+  var match;
 
   while ((match = /(#{[^}]*})/.exec(string))) {
     string = string.replace(match[0], values[i]);
