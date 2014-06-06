@@ -43,9 +43,6 @@ describe('Validator', function() {
   });
 
   describe('#validate', function() {
-    it('throws a specific error that can be caught', function() {
-    });
-
     describe('when there are no failed validations', function() {
       it('resolves the promise', function() {
         model.set('name', 'name-Clem');
