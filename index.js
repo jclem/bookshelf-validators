@@ -33,7 +33,8 @@ function Validator(record, validations) {
 /**
  * Iterate over the validator's validations and return a promise that is
  * resolved if there are no failed validations, or rejected with an error whose
- * `messages` property is an array of the failed validation messages.
+ * `messages` property is an object of the failed validation attributes and
+ * messages.
  *
  * @method validate
  * @return {Promise} a promise, rejected with errors if there are errors
@@ -50,7 +51,9 @@ function Validator(record, validations) {
  *     });
  *
  *     validator.validate().catch(function(errors) {
- *        errors === ['name must be less than 11 characters in length'];
+ *        errors === {
+ *          name: ['name must be less than 11 characters in length']
+ *        };
  *     });
  *
  */
@@ -74,13 +77,22 @@ Validator.prototype.validate = function() {
     return Promise.settle(validations).then(function(results) {
       var messages = results.filter(function(result) {
         return result.isRejected();
-      }).map(function(result) {
-        return result.error().message;
-      });
+      }).reduce(function(errorObject, result) {
+        var attr    = result.error().attr;
+        var message = result.error().message;
+
+        if (errorObject[attr]) {
+          errorObject[attr].push(message);
+        } else {
+          errorObject[attr] = [message];
+        }
+
+        return errorObject;
+      }, {});
 
       var err;
 
-      if (messages.length) {
+      if (!_.isEmpty(messages)) {
         err = new Error();
         err.messages = messages;
         reject(err);
@@ -111,7 +123,7 @@ Validator.prototype.required = function(attribute, testValue, message) {
   }
 
   if (!value) {
-    return Promise.reject(new Error(message));
+    return Promise.reject(buildError(attribute, message));
   } else {
     return Promise.resolve();
   }
@@ -134,7 +146,7 @@ Validator.prototype.match = function(attribute, testValue, message) {
   }
 
   if (value !== matchValue) {
-    return Promise.reject(new Error(message));
+    return Promise.reject(buildError(attribute, message));
   } else {
     return Promise.resolve();
   }
@@ -164,7 +176,7 @@ Validator.prototype.minLength = function(attribute, testValue, message) {
   }
 
   if (value.length < testValue) {
-    return Promise.reject(new Error(message));
+    return Promise.reject(buildError(attribute, message));
   } else {
     return Promise.resolve();
   }
@@ -193,7 +205,7 @@ Validator.prototype.maxLength = function(attribute, testValue, message) {
   }
 
   if (value.length > testValue) {
-    return Promise.reject(new Error(message));
+    return Promise.reject(buildError(attribute, message));
   } else {
     return Promise.resolve();
   }
@@ -221,7 +233,7 @@ Validator.prototype.pattern = function(attribute, testValue, message) {
   }
 
   if (!value.match(testValue)) {
-    return Promise.reject(new Error(message));
+    return Promise.reject(buildError(attribute, message));
   } else {
     return Promise.resolve();
   }
@@ -256,7 +268,7 @@ Validator.prototype.unique = function(attribute, testValue, message) {
 
   return klass.collection().query({ where: query }).fetchOne().then(function(found) {
     if (found && found.id !== self.record.get('id')) {
-      return Promise.reject(new Error(message));
+      return Promise.reject(buildError(attribute, message));
     } else {
       return Promise.resolve();
     }
@@ -286,6 +298,21 @@ function fmt() {
   }
 
   return string;
+}
+
+/**
+ *
+ * @method buildError
+ * @private
+ * @static
+ * @param {String} attr the attribute to attach to the Error
+ * @param {String} message the message for the Error
+ * @return {Error} a new Error
+ */
+function buildError(attr, message) {
+  var err = new Error(message);
+  err.attr = attr;
+  return err;
 }
 
 module.exports = Validator;

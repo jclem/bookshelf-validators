@@ -57,11 +57,13 @@ describe('Validator', function() {
         model.set('name', 'Jonathan Clem');
 
         validator.validate().error(function(err) {
-          err.messages.should.eql([
-            'location is required',
-            '\'Jonathan Clem\' is not a valid name',
-            'name must be less than 11 characters long'
-          ]);
+          err.messages.should.eql({
+            location: ['location is required'],
+            name    : [
+              '\'Jonathan Clem\' is not a valid name',
+              'name must be less than 11 characters long'
+            ]
+          });
 
           done();
         });
@@ -70,6 +72,13 @@ describe('Validator', function() {
   });
 
   describe('#required', function() {
+    it('adds the proper attr to the error', function(done) {
+      validator.required('name').error(function(err) {
+        err.attr.should.eql('name');
+        done();
+      });
+    });
+
     it('fails when a value is not present', function(done) {
       validator.required('name').error(function(err) {
         err.message.should.eql('name is required');
@@ -93,6 +102,16 @@ describe('Validator', function() {
   });
 
   describe('#match', function() {
+    it('adds the proper attr to the error', function(done) {
+      model.set('name', 'x');
+      model.set('name_confirmation', 'xx');
+
+      validator.match('name', 'name_confirmation').error(function(err) {
+        err.attr.should.eql('name');
+        done();
+      });
+    });
+
     it('fails when values do not match', function(done) {
       model.set('name', 'x');
       model.set('name_confirmation', 'xx');
@@ -112,6 +131,15 @@ describe('Validator', function() {
   });
 
   describe('#minLenth', function() {
+    it('adds the proper attr to the error', function(done) {
+      model.set('name', 'xx');
+
+      validator.minLength('name', 3).error(function(err) {
+        err.attr.should.eql('name');
+        done();
+      });
+    });
+
     it('fails when a minimum length is not met', function(done) {
       model.set('name', 'xx');
 
@@ -133,6 +161,15 @@ describe('Validator', function() {
   });
 
   describe('#maxLength', function() {
+    it('adds the proper attr to the error', function(done) {
+      model.set('name', 'xxxx');
+
+      validator.maxLength('name', 3).error(function(err) {
+        err.attr.should.eql('name');
+        done();
+      });
+    });
+
     it('fails when a max length is exceeded', function(done) {
       model.set('name', 'xxxx');
 
@@ -159,6 +196,15 @@ describe('Validator', function() {
   });
 
   describe('#pattern', function() {
+    it('adds the proper attr to the error', function(done) {
+      model.set('name', '!');
+
+      validator.pattern('name', /^[a-z]+$/).error(function(err) {
+        err.attr.should.eql('name');
+        done();
+      });
+    });
+
     it('tests that a pattern matches a value', function(done) {
       model.set('name', '!');
 
@@ -180,6 +226,18 @@ describe('Validator', function() {
   });
 
   describe('#unique', function() {
+    it('adds the proper attr to the error', function(done) {
+      var model2 = Model.forge({ name: 'name' });
+      model.set('name', 'name');
+
+      model2.save().then(function() {
+        validator.unique('name').error(function(err) {
+          err.attr.should.eql('name');
+          done();
+        });
+      });
+    });
+
     it('fails when a value is not unique', function(done) {
       var model2 = Model.forge({ name: 'name' });
       model.set('name', 'name');
